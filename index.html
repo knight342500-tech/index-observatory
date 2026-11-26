@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN" data-hosted="true">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>指数观察台 · V3.3</title><link rel="stylesheet" href="style.css"><script src="app.js" defer></script>
+</head>
+<body>
+<header class="top"><div class="brand"><span class="mark" aria-hidden="true">▤</span><span>指数观察台</span><span class="version">V3.3</span></div><nav aria-label="页面导航"><a href="#rotation">六簇轮动</a><a href="#signals">信号跟踪</a><a href="#data">全池数据</a></nav><button id="refresh" type="button">↻ 刷新</button></header>
+<main>
+<header class="hero"><div><div class="stamp" id="stamp">正在读取收盘档案</div><h1>市场收盘观察</h1><p id="lead">读取经验证的指数收盘数据。</p></div><div class="hero-status" id="status" aria-live="polite"></div></header>
+<div id="alert" class="alert" role="status" hidden></div>
+<section id="metrics" class="metrics" aria-label="市场概览"></section>
+<div class="top-grid">
+<section id="rotation" class="panel"><div class="section-title"><div><h2>六簇轮动</h2><p>按 20 日、5 日指数等权收益排序</p></div><span class="quiet">收盘回顾</span></div><div class="scroll"><table id="clusters"></table></div><div class="trend-grid" id="trends"></div></section>
+<section id="env" class="panel"><div class="section-title"><div><h2>市场环境</h2><p>五项输入及数据时点</p></div><span id="gate"></span></div><div id="gates"></div><div class="footnote">环境灯用于背景观察。缺失的分项单独显示。</div></section></div>
+<section id="signals" class="panel"><div class="section-title"><div><h2>条件信号</h2><p>按风险、确认进度和触发日期跟踪，每条附下次复核规则</p></div><label class="filter">类型 <select id="signalFilter"><option value="">全部</option><option>机会观察</option><option>风险复核</option><option>待确认</option></select></label></div><div class="scroll"><table id="signalTable"></table></div><button id="more" class="more" type="button">查看全部活动信号</button></section>
+<section id="reports" class="panel"><div class="section-title"><div><h2>日、周、月简报</h2><p>取自同一收盘档案，覆盖不足的窗口显示缺口</p></div><div id="reportTabs" class="tabs" aria-label="简报周期"><button type="button" data-kind="daily" aria-pressed="true">日报</button><button type="button" data-kind="weekly" aria-pressed="false">周报</button><button type="button" data-kind="monthly" aria-pressed="false">月报</button></div></div><div id="period"></div></section>
+<section id="data" class="panel"><div class="section-title"><div><h2>全池数据</h2><p>核心池 61 项 · 环境观察 17 项</p></div><label class="filter">筛选 <input id="search" type="search" placeholder="名称、代码或簇" autocomplete="off"></label></div><details open><summary>核心指数与板块</summary><div class="scroll"><table id="indexTable"></table></div></details><details><summary>17 项环境观察</summary><div class="scroll"><table id="temperatures"></table></div></details><details><summary>数据缺口与验证证据</summary><div id="evidence"></div></details></section>
+<footer>指数收盘研究 · 北京时间 · <span id="footerDate">V3.3</span></footer>
+</main></body></html>
