@@ -64,12 +64,12 @@ function decision() {
   const anchors = report.anchors.map(a => `<div><b>${html(a.name)}</b> ${colored(a.ret)}<small>${html(a.state)} · ${number(a.close)} / MA20 ${number(a.ma)}</small></div>`).join('');
   const lists = ['机会', '风险'].map(category => {
     const selected = report.actions.filter(a => a.category === category);
-    const cards = selected.map(a => `<li><b>${html(a.name)} · ${html(a.kind)}</b><small>${html(a.evidence)}</small><p>${html(a.action)}。${html(a.condition)}。</p>${a.notes?.length ? `<small>${html(a.notes.join(' · '))}</small>` : ''}<small>复核 ${html(a.review)}</small></li>`).join('');
+    const cards = selected.map(a => `<li><b>${html(a.name)} · ${html(a.kind)}</b><small>${html(a.evidence)}</small><p>${html(a.action)}。</p><p>${html(a.condition_label || "跟踪条件")} · ${html(a.condition)}。</p>${a.notes?.length ? `<small>${html(a.notes.join(' · '))}</small>` : ''}<small>复核 ${html(a.review)}</small></li>`).join('');
     const empty = report.published ? '当前可评估范围内无活动项。' : '覆盖不足，本截面暂缓发布。';
     return `<div><h3>${category === '机会' ? '机会观察' : '风险复核'}</h3>${cards ? `<ol>${cards}</ol>` : `<p class="footnote">${empty}</p>`}</div>`;
   }).join('');
   const watch=(data.watch||[]).slice(0,6).map(item=>`<li><b>${html(item.name)}</b> · ${html(item.detail.join(' / '))}</li>`).join('');
-  set('decision', `<div class="section-title"><div><h2>市场判断与下一步</h2><p>${html(report.title)} · ${html(report.summary)}</p></div></div><div class="decision-anchors">${anchors}</div><div class="decision-actions">${lists}</div><p class="decision-stance"><b>下一交易日</b> ${html(report.stance)} <span class="number">${html(report.next_session)}</span></p><p class="footnote">${html(report.limitation)}</p>${watch ? `<details><summary>均线跟踪清单 · ${data.watch.length} 项</summary><ul>${watch}</ul></details>` : ''}`);
+  set('decision', `<div class="section-title"><div><h2>市场判断与下一步</h2><p>${html(report.title)} · ${html(report.summary)}</p>${report.activity ? `<p>${html(report.activity)}</p>` : ""}</div></div><div class="decision-anchors">${anchors}</div><div class="decision-actions">${lists}</div><p class="decision-stance"><b>下一交易日</b> ${html(report.stance)} <span class="number">${html(report.next_session)}</span></p><p class="footnote">${html(report.limitation)}</p>${watch ? `<details><summary>均线跟踪清单 · ${data.watch.length} 项</summary><ul>${watch}</ul></details>` : ''}`);
 }
 
 function render() {
