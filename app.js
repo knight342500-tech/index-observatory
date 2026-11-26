@@ -44,7 +44,7 @@ function signals() {
 function indexRows() {
   const text = element('search').value.trim().toLowerCase();
   const rows = data.indexes.filter(x => [x.id,x.name,x.code].some(v => String(v).toLowerCase().includes(text)));
-  table('indexTable',['ID / 指数','收盘','1 日','5 日','20 日','MA20','MA60','量比','来源与状态'],rows.map(r => [`<b>${html(r.name)}</b><small>${html(r.id)} · ${html(r.code)}</small>`, `<span class="number">${number(r.close)}</span>`, colored(r.r1),colored(r.r5),colored(r.r20), `<span class="number">${number(r.m20)}</span>`,`<span class="number">${number(r.m60)}</span>`,`<span class="number">${number(r.v)}</span>`, `${html(r.source || '待确认')}<small>${html(r.note)}${r.last ? ` · ${html(r.last)}` : ''}</small>`]));
+  table('indexTable',['ID / 指数','收盘','1 日','5 日','20 日','MA20','MA60','量比','来源与状态'],rows.map(r => [`<b>${html(r.name)}</b><small>${html(r.id)} · ${html(r.code)}</small>`, `<span class="number">${number(r.close)}</span>`, colored(r.r1),colored(r.r5),colored(r.r20), `<span class="number">${number(r.m20)}</span>`,`<span class="number">${number(r.m60)}</span>`,`<span class="number">${number(r.v)}</span>`, `${html(r.source || '待确认')}<small>${html(r.note)}${r.last ? ` · ${html(r.last)}` : ''}${r.received_at ? ` · 采集 ${html(r.received_at.slice(11,19))}` : ''}</small>`]));
 }
 
 function period() {
@@ -63,7 +63,7 @@ function render() {
   set('stamp',`${html(data.asof)}　收盘档案 / 北京时间`);
   set('lead',`${x.up} 项上涨、${x.down} 项下跌、${x.flat} 项持平。${ranked.filter(c=>c.status==='强势').length} 簇强势，${ranked.filter(c=>c.status==='弱势').length} 簇弱势。`);
   set('status',`${chip(data.mode,'yellow')}<br>${html(data.subtitle)}`);
-  set('metrics',[['收盘覆盖',`${x.close} / ${x.n}`,'同日有可用收盘的核心指数'],['上涨 / 下跌',`${x.up} / ${x.down}`,`有单日变动 ${x.up+x.down+x.flat} 项`],['开盘 / 量比',`${x.open} / ${x.volume}`,'分别按本日字段可用数统计'],['活动信号', data.signals.length,'含观察、待确认与风险复核']].map(([label,v,note])=>`<div class="metric"><div>${html(label)}</div><strong>${html(v)}</strong><small>${html(note)}</small></div>`).join(''));
+  set('metrics',[['收盘覆盖',`${x.close} / ${x.n}`,'同日有可用收盘的核心指数'],['上涨 / 下跌',`${x.up} / ${x.down}`,`有单日变动 ${x.up+x.down+x.flat} 项`],['开盘 / 量比',`${x.open} / ${x.volume}`,'分别按本日字段可用数统计'],['活动信号', data.signals.length,data.mode==='数据简报'?'覆盖不足，已暂缓发布':'含观察、待确认与风险复核']].map(([label,v,note])=>`<div class="metric"><div>${html(label)}</div><strong>${html(v)}</strong><small>${html(note)}</small></div>`).join(''));
   table('clusters',['投资簇','1 日','5 日','20 日','代表数','联动'],ranked.map(c=>[`<span class="rank">${html(c.rank)}</span><b>${html(c.name)}</b><small>${html([c.status,...c.risks,c.note].filter(Boolean).join(' · '))}</small>`,colored(c.ret),colored(c.r5),colored(c.r20),`<span class="number">${c.N}/${c.M}</span><small>门槛 ${c.min}</small>`,`<span class="number">${number(c.corr20)}</span><small>${c.corr20==null?'待评估':c.corr20>.8?'高联动':c.corr20>=.5?'中等':'分化'}</small>`]));
   set('gate',chip(data.gate,gateColor(data.gate)));
   set('gates',data.gates.map(g=>`<div class="gate-row"><div><b>${html(g.label)}</b><small>${html(g.detail)}</small></div>${chip(g.state,gateColor(g.state))}</div>`).join(''));
