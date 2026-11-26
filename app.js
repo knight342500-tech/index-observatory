@@ -7,7 +7,7 @@ const chip = (value, cls='gray') => `<span class="chip ${cls}">${html(value)}</s
 const gateColor = state => ({红:'red',绿:'green',黄:'yellow'})[state] || 'gray';
 const set = (id, body) => { element(id).innerHTML = body; };
 const table = (id, headings, rows) => set(id, `<thead><tr>${headings.map(x => `<th scope="col">${html(x)}</th>`).join('')}</tr></thead><tbody>${rows.length ? rows.map(row => `<tr>${row.map(x => `<td>${x}</td>`).join('')}</tr>`).join('') : `<tr><td class="empty" colspan="${headings.length}">当前筛选没有匹配记录</td></tr>`}</tbody>`);
-let data = null, showingAll = false, kind = 'daily', inFlight = false;
+let data = null, latest = null, baseline = null, showingAll = false, kind = 'daily', inFlight = false;
 
 function charts() {
   set('trends', data.clusters.map(c => `<div class="trend"><small>${html(c.name)} · 近 32 个计划日</small><canvas id="trend${c.id}" aria-label="${html(c.name)}合成指数走势" role="img"></canvas></div>`).join(''));
@@ -62,7 +62,7 @@ function render() {
   const ranked = [...data.clusters].sort((a,b)=>(a.rank||99)-(b.rank||99));
   set('stamp',`${html(data.asof)}　收盘档案 / 北京时间`);
   set('lead',`${x.up} 项上涨、${x.down} 项下跌、${x.flat} 项持平。${ranked.filter(c=>c.status==='强势').length} 簇强势，${ranked.filter(c=>c.status==='弱势').length} 簇弱势。`);
-  set('status',`${chip(data.mode,'yellow')}<br>${html(data.subtitle)}`);
+  set('status',`${chip(data.mode,'yellow')}<br>${html(data.subtitle)}${data.attempted_at ? `<br>采集 ${html(data.attempted_at.slice(0,16).replace('T',' '))}` : ''}`);
   set('metrics',[['收盘覆盖',`${x.close} / ${x.n}`,'同日有可用收盘的核心指数'],['上涨 / 下跌',`${x.up} / ${x.down}`,`有单日变动 ${x.up+x.down+x.flat} 项`],['开盘 / 量比',`${x.open} / ${x.volume}`,'分别按本日字段可用数统计'],['活动信号', data.signals.length,data.mode==='数据简报'?'覆盖不足，已暂缓发布':'含观察、待确认与风险复核']].map(([label,v,note])=>`<div class="metric"><div>${html(label)}</div><strong>${html(v)}</strong><small>${html(note)}</small></div>`).join(''));
   table('clusters',['投资簇','1 日','5 日','20 日','代表数','联动'],ranked.map(c=>[`<span class="rank">${html(c.rank)}</span><b>${html(c.name)}</b><small>${html([c.status,...c.risks,c.note].filter(Boolean).join(' · '))}</small>`,colored(c.ret),colored(c.r5),colored(c.r20),`<span class="number">${c.N}/${c.M}</span><small>门槛 ${c.min}</small>`,`<span class="number">${number(c.corr20)}</span><small>${c.corr20==null?'待评估':c.corr20>.8?'高联动':c.corr20>=.5?'中等':'分化'}</small>`]));
   set('gate',chip(data.gate,gateColor(data.gate)));
@@ -96,16 +96,21 @@ async function refresh(manual=false) {
       next = JSON.parse(new TextDecoder().decode(decoded));
     }
     if (next.rule!=='V3.3' || next.indexes?.length!==61 || next.clusters?.length!==6 || !next.asof) throw new Error('快照结构异常');
-    if (data && next.asof<data.asof) throw new Error('读到较早版本');
-    data=next; render();
+    if (latest && next.asof<latest.asof) throw new Error('读到较早版本');
+    baseline=next.baseline || null;
+    latest=next;
+    element('archiveChoice').hidden=!baseline;
+    data=element('snapshot').value==='baseline' && baseline ? baseline : latest;
+    render();
     element('alert').hidden=!manual;
-    if(manual) element('alert').textContent=`已读取 ${data.asof} 的服务器档案。`;
+    if(manual) element('alert').textContent=`已读取服务器档案，最新交易日为 ${latest.asof}。`;
   } catch (err) {
     element('alert').hidden=false;
     element('alert').textContent=data ? `刷新失败，当前保留 ${data.asof} 的数据。` : `数据读取失败，请重试刷新。${err.message}`;
   } finally { inFlight=false; element('refresh').disabled=false; }
 }
 
+element('snapshot').addEventListener('change',()=>{data=element('snapshot').value==='baseline' && baseline ? baseline : latest;showingAll=false;if(data)render();});
 element('refresh').addEventListener('click',()=>refresh(true));
 element('signalFilter').addEventListener('change',()=>{showingAll=false;if(data)signals();});
 element('search').addEventListener('input',()=>{if(data)indexRows();});
