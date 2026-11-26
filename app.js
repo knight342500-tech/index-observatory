@@ -65,6 +65,9 @@ function render() {
   set('status',`${chip(data.mode,'yellow')}<br>${html(data.subtitle)}${data.attempted_at ? `<br>采集 ${html(data.attempted_at.slice(0,16).replace('T',' '))}` : ''}`);
   set('metrics',[['收盘覆盖',`${x.close} / ${x.n}`,'同日有可用收盘的核心指数'],['上涨 / 下跌',`${x.up} / ${x.down}`,`有单日变动 ${x.up+x.down+x.flat} 项`],['开盘 / 量比',`${x.open} / ${x.volume}`,'分别按本日字段可用数统计'],['活动信号', data.signals.length,data.mode==='数据简报'?'覆盖不足，已暂缓发布':'含观察、待确认与风险复核']].map(([label,v,note])=>`<div class="metric"><div>${html(label)}</div><strong>${html(v)}</strong><small>${html(note)}</small></div>`).join(''));
   table('clusters',['投资簇','1 日','5 日','20 日','代表数','联动'],ranked.map(c=>[`<span class="rank">${html(c.rank)}</span><b>${html(c.name)}</b><small>${html([c.status,...c.risks,c.note].filter(Boolean).join(' · '))}</small>`,colored(c.ret),colored(c.r5),colored(c.r20),`<span class="number">${c.N}/${c.M}</span><small>门槛 ${c.min}</small>`,`<span class="number">${number(c.corr20)}</span><small>${c.corr20==null?'待评估':c.corr20>.8?'高联动':c.corr20>=.5?'中等':'分化'}</small>`]));
+  const same=data.same_day;
+  set('sameDay',same && same.up!==null ? `六簇起止日一致，${same.up} 簇上涨、${same.down} 簇下跌。近 65 个自然日有 ${same.days} 个六簇共同区间。` : '今日缺少六簇共同起止区间。下表按相同起止区间列示最多 20 个有效配对。');
+  table('pairs',['投资簇配对','有效区间 / 20','相关系数'],(data.pairs||[]).map(p=>[html(p.label),String(p.days),number(p.correlation)]));
   set('gate',chip(data.gate,gateColor(data.gate)));
   set('gates',data.gates.map(g=>`<div class="gate-row"><div><b>${html(g.label)}</b><small>${html(g.detail)}</small></div>${chip(g.state,gateColor(g.state))}</div>`).join(''));
   table('temperatures',['观察项','来源口径','观测日期','1 日','20 期','可用状态'],data.temperatures.map(r=>[`${html(r.name)}<small>${html(r.id)} · ${html(r.alias)}</small>`,html(r.source),html(r.date),colored(r.r1),colored(r.r20),html(r.state)]));
