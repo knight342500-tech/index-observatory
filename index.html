@@ -10,6 +10,7 @@
 <header class="hero"><div><div class="stamp" id="stamp">正在读取收盘档案</div><h1>市场收盘观察</h1><p id="lead">读取经验证的指数收盘数据。</p></div><div class="hero-status"><label class="filter" id="archiveChoice" hidden>收盘档案 <select id="snapshot"><option value="latest">最新截面</option><option value="baseline">2026-11-25 · 验证样本</option></select></label><div id="status" aria-live="polite"></div></div></header>
 <div id="alert" class="alert" role="status" hidden></div>
 <section id="metrics" class="metrics" aria-label="市场概览"></section>
+<section id="decision" class="panel" hidden></section>
 <div class="top-grid">
 <section id="rotation" class="panel"><div class="section-title"><div><h2>六簇轮动</h2><p>按 20 日、5 日指数等权收益排序</p></div><span class="quiet">收盘回顾</span></div><div class="scroll"><table id="clusters"></table></div><div class="trend-grid" id="trends"></div><details><summary>跨簇联动</summary><p class="footnote" id="sameDay"></p><div class="scroll"><table id="pairs"></table></div></details></section>
 <section id="env" class="panel"><div class="section-title"><div><h2>市场环境</h2><p>五项输入及数据时点</p></div><span id="gate"></span></div><div id="gates"></div><div class="footnote">环境灯用于背景观察。缺失的分项单独显示。</div></section></div>

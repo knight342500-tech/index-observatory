@@ -57,6 +57,21 @@ function period() {
   set('period', `<div class="period-date">${html(p.start)}${p.end===p.start?'':` 至 ${html(p.end)}`} · ${p.days} 个已入库沪深交易日</div><div class="period-grid"><div class="scroll"><table><thead><tr><th>投资簇</th><th>累计点位变化</th><th>有效区间</th></tr></thead><tbody>${p.clusters.map(c => `<tr><td>${html(c.name)}</td><td>${colored(c.ret)}</td><td>${c.valid} / ${c.expected}</td></tr>`).join('')}</tbody></table></div><div><h3>${names[kind]}内触发构成</h3><p>${p.events.length} 条指数事件 · ${new Set(p.events.map(e=>e.date)).size} 个独立日期。</p>${monthNote}<ul>${breakdown || '<li>此窗口无记录</li>'}</ul><p class="footnote">周报与月报截至本快照交易日。指数点位变化按有效观察窗口统计。</p></div></div>`);
 }
 
+function decision() {
+  const report = data.decision;
+  if (!report) { element('decision').hidden = true; return; }
+  element('decision').hidden = false;
+  const anchors = report.anchors.map(a => `<div><b>${html(a.name)}</b> ${colored(a.ret)}<small>${html(a.state)} · ${number(a.close)} / MA20 ${number(a.ma)}</small></div>`).join('');
+  const lists = ['机会', '风险'].map(category => {
+    const selected = report.actions.filter(a => a.category === category);
+    const cards = selected.map(a => `<li><b>${html(a.name)} · ${html(a.kind)}</b><small>${html(a.evidence)}</small><p>${html(a.action)}。${html(a.condition)}。</p>${a.notes?.length ? `<small>${html(a.notes.join(' · '))}</small>` : ''}<small>复核 ${html(a.review)}</small></li>`).join('');
+    const empty = report.published ? '当前可评估范围内无活动项。' : '覆盖不足，本截面暂缓发布。';
+    return `<div><h3>${category === '机会' ? '机会观察' : '风险复核'}</h3>${cards ? `<ol>${cards}</ol>` : `<p class="footnote">${empty}</p>`}</div>`;
+  }).join('');
+  const watch=(data.watch||[]).slice(0,6).map(item=>`<li><b>${html(item.name)}</b> · ${html(item.detail.join(' / '))}</li>`).join('');
+  set('decision', `<div class="section-title"><div><h2>市场判断与下一步</h2><p>${html(report.title)} · ${html(report.summary)}</p></div></div><div class="decision-anchors">${anchors}</div><div class="decision-actions">${lists}</div><p class="decision-stance"><b>下一交易日</b> ${html(report.stance)} <span class="number">${html(report.next_session)}</span></p><p class="footnote">${html(report.limitation)}</p>${watch ? `<details><summary>均线跟踪清单 · ${data.watch.length} 项</summary><ul>${watch}</ul></details>` : ''}`);
+}
+
 function render() {
   const x = data.coverage;
   const ranked = [...data.clusters].sort((a,b)=>(a.rank||99)-(b.rank||99));
@@ -73,7 +88,7 @@ function render() {
   table('temperatures',['观察项','来源口径','观测日期','1 日','20 期','可用状态'],data.temperatures.map(r=>[`${html(r.name)}<small>${html(r.id)} · ${html(r.alias)}</small>`,html(r.source),html(r.date),colored(r.r1),colored(r.r20),html(r.state)]));
   set('evidence',`<ul>${data.gaps.map(g=>`<li>${html(g)}</li>`).join('')}</ul><p class="footnote">V3.3 量能、簇共振与环境阈值按现有审计用作说明标签。正式主截面时间为 16:15。</p>`);
   set('footerDate',`${html(data.rule)} · 数据 ${html(data.asof)}`);
-  charts(); signals(); indexRows(); period();
+  charts(); signals(); indexRows(); period(); decision();
 }
 
 async function refresh(manual=false) {
